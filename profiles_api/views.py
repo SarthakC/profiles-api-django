@@ -1,8 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.authentication import TokenAuthentication
 
-from profiles_api.serializers import HelloSerializer
+from profiles_api.serializers import HelloSerializer, UserProfileSerializer
+from profiles_api.models import UserProfile
+from profiles_api.permissions import UpdateOwnProfile
 
 
 class HelloApiView(APIView):
@@ -26,7 +30,7 @@ class HelloApiView(APIView):
             return Response({"message": message})
 
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     def put(self, request, pk=None):
         """Handle updating an object"""
@@ -41,7 +45,7 @@ class HelloApiView(APIView):
         return Response({"method": "DELETE"})
 
 
-class HelloViewSet(viewsets.ViewSet):
+class HelloViewSet(ViewSet):
     """Test API ViewSet"""
 
     serializer_class = HelloSerializer
@@ -70,7 +74,7 @@ class HelloViewSet(viewsets.ViewSet):
         else:
             return Response(
                 serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
+                status=HTTP_400_BAD_REQUEST
             )
 
     def retreive(self, request, pk=None):
@@ -88,3 +92,11 @@ class HelloViewSet(viewsets.ViewSet):
     def destroy(self, request, pk=None):
         """Delete an object"""
         return Response({"http_method": "DELETE"})
+
+
+class UserProfileViewSet(ModelViewSet):
+    """Handle creating and updating profiles"""
+    serializer_class = UserProfileSerializer
+    queryset = UserProfile.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (UpdateOwnProfile,)
