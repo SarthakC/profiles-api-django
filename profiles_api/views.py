@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.viewsets import ViewSet, ModelViewSet
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.filters import SearchFilter
 
 from profiles_api.serializers import HelloSerializer, UserProfileSerializer
 from profiles_api.models import UserProfile
@@ -100,3 +101,5 @@ class UserProfileViewSet(ModelViewSet):
     queryset = UserProfile.objects.all()
     authentication_classes = (TokenAuthentication,)
     permission_classes = (UpdateOwnProfile,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name', 'email',)
