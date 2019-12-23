@@ -6,10 +6,11 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.filters import SearchFilter
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
+from rest_framework.permissions import IsAuthenticated
 
-from profiles_api.serializers import HelloSerializer, UserProfileSerializer
-from profiles_api.models import UserProfile
-from profiles_api.permissions import UpdateOwnProfile
+from profiles_api.serializers import HelloSerializer, UserProfileSerializer, ProfileFeedItemSerializer
+from profiles_api.models import UserProfile, ProfileFeedItem
+from profiles_api.permissions import UpdateOwnProfile, UpdateOwnStatus
 
 
 class HelloApiView(APIView):
@@ -82,23 +83,28 @@ class HelloViewSet(ViewSet):
 
     def retreive(self, request, pk=None):
         """Handle getting and object by id"""
+
         return Response({"http_method": "GET"})
 
     def update(self, request, pk=None):
         """Handle updating an object"""
+
         return Response({"http_method": "PUT"})
 
     def partial_update(self, request, pk=None):
         """Patch an object"""
+
         return Response({"http_method": "PATCH"})
 
     def destroy(self, request, pk=None):
         """Delete an object"""
+
         return Response({"http_method": "DELETE"})
 
 
 class UserProfileViewSet(ModelViewSet):
     """Handle creating and updating profiles"""
+
     serializer_class = UserProfileSerializer
     queryset = UserProfile.objects.all()
     authentication_classes = (TokenAuthentication,)
@@ -109,4 +115,18 @@ class UserProfileViewSet(ModelViewSet):
 
 class UserLoginApiView(ObtainAuthToken):
     """Handle creating user authentication tokens"""
+
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+
+class UserProfileFeedViewSet(ModelViewSet):
+    """Handles creating, reading, and updating profile feed items"""
+
+    authentication_classes = (TokenAuthentication,)
+    serializer_class = ProfileFeedItemSerializer
+    queryset = ProfileFeedItem.objects.all()
+    permission_classes = (UpdateOwnStatus,IsAuthenticated)
+
+    def perform_create(self, serializer):
+        """Sets the user profile to the logged in user"""
+        serializer.save(user_profile=self.request.user)

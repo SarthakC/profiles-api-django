@@ -1,4 +1,5 @@
 from django.contrib import admin
-from profiles_api import models
+from profiles_api.models import UserProfile, ProfileFeedItem
 
-admin.site.register(models.UserProfile)
+admin.site.register(UserProfile)
+admin.site.register(ProfileFeedItem)
